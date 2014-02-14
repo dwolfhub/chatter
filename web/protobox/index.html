@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>protobox</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div class="logo">
+        <h1><a href="https://github.com/protobox/protobox" title="protobox">protobox</a></h1>
+        <div class="version" id="protobox_version">...</div>
+    </div>
+
+    <div class="content">
+        <div class="row">
+            <div class="column">
+                <h2>My Sites</h2>
+                <ul id="protobox_sites" class="nav sites"></ul>
+            </div>
+            <div class="column">
+                <h2>My Databases</h2>
+                <ul id="protobox_dbs" class="nav dbs"></ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="column">
+                <h2>Quicklinks</h2>
+                <ul class="nav">
+                    <li><a href="https://github.com/protobox/protobox">Repository</a></li>
+                    <!--<li><a href="phpmyadmin/">phpMyAdmin</a></li>
+                    <li><a href="memcached-admin/">phpMemcachedAdmin</a></li>
+                    <li><a href="webgrind/">Webgrind</a></li>
+                    <li><a href="phpinfo/">PHP Info</a></li>-->
+                </ul>
+            </div>
+            <div class="column">
+                <h2>Help?</h2>
+                <ul class="nav">
+                    <li><a href="http://getprotobox.com/docs/issues/hosts" target="_blank">How do add /etc/hosts or make the .dev urls work?</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    request = new XMLHttpRequest;
+    request.open('GET', 'data.json', true);
+    request.send();
+
+    request.onload = function() {
+        processData(JSON.parse(this.response));
+    }
+
+    request.onerror = function() {
+        alert('Data could not be loaded.');
+    }
+
+    processData = function(data) {
+        data = data || {};
+
+        // Version
+        document.querySelector('#protobox_version').textContent = data.version;
+
+        // Sites
+        sites = '';
+        for(var i = 0; i < data.sites.length; i++) {
+            sites += '<li>' + data.sites[i]['name'] + ': <a href="' + data.sites[i]['site'] + '" target="_blank">' + data.sites[i]['site'] + '</a></li>';
+        }
+        document.querySelector('#protobox_sites').innerHTML = sites;
+
+        // Databases
+        dbs = '';
+        for(var i = 0; i < data.databases.length; i++) {
+            dbs += '<li>' + data.databases[i]['type'] + ': ' + data.databases[i]['name'] + '</li>';
+        }
+        document.querySelector('#protobox_dbs').innerHTML = dbs;
+    }
+    </script>
+</body>
+</html>
