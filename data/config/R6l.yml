@@ -12,9 +12,9 @@ vagrant:
   vm:
     box: precise64
     box_url: 'http://files.vagrantup.com/precise64.box'
-    hostname: boilerplate.dev
+    hostname: chatter.dev
     network:
-      private_network: 7.7.7.7
+      private_network: 7.7.7.8
       forwarded_port:
         port1:
           host: ''
@@ -22,7 +22,7 @@ vagrant:
     provider:
       virtualbox:
         modifyvm:
-          name: local-vm-name
+          name: chatter-vm
           memory: '512'
         setextradata:
           VBoxInternal2/SharedFoldersEnableSymlinksCreate/v-root: 1
@@ -92,9 +92,9 @@ nginx:
   vhosts:
     -
       name: app
-      server_name: boilerplate.dev
+      server_name: chatter.dev
       server_aliases:
-        - www.boilerplate.dev
+        - www.chatter.dev
       www_root: /srv/www/frontend/
       listen_port: 80
       index_files:
@@ -170,7 +170,7 @@ mariadb:
   root_password: p@ssw0rd
   databases:
     -
-      name: app
+      name: chatter
       host: localhost
       user: admin
       password: p@ssw0rd

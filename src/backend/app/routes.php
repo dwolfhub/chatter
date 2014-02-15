@@ -13,5 +13,6 @@
 
 Route::get('/', function()
 {
-	return 'Here\'s your backend, lol.';
+	return Serve::fire();
+	// return 'Here\'s your backend, lol.';
 });

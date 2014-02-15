@@ -1,0 +1,9 @@
+body {
+    .chat-messages {
+        max-height: 400px;
+        overflow: scroll;
+        dd {
+            margin-bottom: 15px;
+        }
+    }
+}
