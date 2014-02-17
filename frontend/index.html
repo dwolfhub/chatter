@@ -32,7 +32,7 @@
                     <div class="chat-messages">
                         <dl ng-repeat="msg in messages">
                             <dt>{{ msg.name }} <span class="small text-muted">[{{ msg.datetime }}]</span></dt>
-                            <dd>{{ msg.body }}</dd>
+                            <dd ng-bind-html="msg.body"></dd>
                         </dl>
                     </div>
                 </div>
