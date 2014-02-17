@@ -16,13 +16,18 @@ class Chatter implements MessageComponentInterface {
         // Store the new connection to send messages to later
         $this->clients->attach($conn);
 
-        echo "New connection! ({$conn->resourceId})\n";
+        $clientCount = count($this->clients);
+        $msg = '{"alias":"Admin","body":"A user has joined. Now ' . $clientCount . ' active users."}';
+        foreach ($this->clients as $client) {
+            if ($conn !== $client) {
+                // The sender is not the receiver, send to each client connected
+                $client->send($msg);
+            }
+        }
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
         $numRecv = count($this->clients) - 1;
-        // echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
-        //     , $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
 
         foreach ($this->clients as $client) {
             if ($from !== $client) {
@@ -36,12 +41,17 @@ class Chatter implements MessageComponentInterface {
         // The connection is closed, remove it, as we can no longer send it messages
         $this->clients->detach($conn);
 
-        echo "Connection {$conn->resourceId} has disconnected\n";
+        $clientCount = count($this->clients);
+        $msg = '{"alias":"Admin","body":"A user has left. Now ' . $clientCount . ' active users."}';
+        foreach ($this->clients as $client) {
+            if ($conn !== $client) {
+                // The sender is not the receiver, send to each client connected
+                $client->send($msg);
+            }
+        }
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e) {
-        echo "An error has occurred: {$e->getMessage()}\n";
-
         $conn->close();
     }
 }

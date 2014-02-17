@@ -1,5 +1,10 @@
 
 var app = angular.module('chatter', [])
+    .directive('focus', function() {
+        return function(scope, element) {
+            element[0].focus()
+        }
+    })
     .controller('ChatterCtrl', ['$scope', function ($scope) {
         $scope.messages = [];
         $scope.message = {};
