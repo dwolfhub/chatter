@@ -1,4 +1,0 @@
-chatter
-=======
-
-chat application
