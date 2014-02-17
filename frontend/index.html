@@ -11,18 +11,18 @@
         <div class="container" ng-controller="ChatterCtrl">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-offset-2 col-md-8 col-sm-12 col-xs-12">
-                    <h1 class="">ChatterJS</h1>
+                    <h1>ChatterJS</h1>
                     <hr>
                     <form class="form css-form" role="form" novalidate name="messageForm">
                         <div class="row">
-                            <div class="form-group col-xs-4">
-                                <input type="text" name="alias" class="form-control" placeholder="Alias" ng-model="message.alias" focus required />
+                            <div class="form-group col-md-3 col-sm-5 col-xs-6">
+                                <input type="text" name="alias" class="form-control" placeholder="Enter a name" ng-model="message.alias" focus required />
                             </div>
                             <div class="col-xs-8">
                             </div>
                         </div>
                         <div class="input-group" ng-class="{'has-error': messageForm.body.$invalid}">
-                            <input type="text" class="form-control" placeholder="Message" ng-model="message.body" required />
+                            <input type="text" class="form-control" placeholder="Enter your message" ng-model="message.body" required />
                             <span class="input-group-btn">
                                 <button type="submit" class="btn btn-primary" ng-click="sendMessage()" ng-disabled="messageForm.alias.$invalid">Send</button>
                             </span>
