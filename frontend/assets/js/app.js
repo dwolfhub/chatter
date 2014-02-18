@@ -1,18 +1,33 @@
 function ChatterWebSocket() {
-    this.socketURL = 'ws://chatterjs.com:8080/';
-    this.listeners = [];
+    var socket,
+    socketURL = 'ws://chatterjs.com:8080/',
+    listeners = [];
+
     this.addEventListener = function (event, callback) {
-        this.listeners[event] = callback;
+        listeners[event] = callback;
     };
     this.connect = function () {
-        this.socket = new WebSocket(this.socketURL);
-        for (event in this.listeners) {
-            this.socket.addEventListener(event, this.listeners[event]);
+        socket = new WebSocket(socketURL);
+        for (event in listeners) {
+            socket.addEventListener(event, listeners[event]);
         }
     };
     this.send = function (message) {
-        this.socket.send(message);
+        socket.send(message);
     }
+}
+
+function MessageParser ($sce) {
+    var body,
+        convertLinks = function () {
+            body = body.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1">$1</a>');
+        };
+
+    this.parse = function (input) {
+        body = input;
+        convertLinks();
+        return $sce.trustAsHtml(body);
+    };
 }
 
 var app = angular.module('chatter', [])
@@ -24,7 +39,6 @@ var app = angular.module('chatter', [])
     .controller('ChatterCtrl', ['$scope', '$sce', function ($scope, $sce) {
         $scope.messages = [];
         $scope.message = {};
-        $scope.actives = 0;
 
         $scope.sendMessage = function () {
             socket.send(JSON.stringify($scope.message));
@@ -34,9 +48,11 @@ var app = angular.module('chatter', [])
 
         $scope.showMessage = function (name, message) {
             var now = new Date();
+            var msgParser = new MessageParser($sce);
+
             $scope.messages.unshift({
                 name: name,
-                body: $scope.parseBody(message),
+                body: msgParser.parse(message),
                 datetime: now.toUTCString()
             });
         };
@@ -64,12 +80,10 @@ var app = angular.module('chatter', [])
         socket.addEventListener('error', function (e) {
             $scope.showMessage('Admin', 'An error has occurred! Trying to reconnect.');
             $scope.$apply();
-            // socket.connect();
         });
         socket.addEventListener('close', function (e) {
             $scope.showMessage('Admin', 'You are now disconnected!');
             $scope.$apply();
-            // socket.connect();
         });
         socket.addEventListener('message', function (e) {
             var data = JSON.parse(e.data);
