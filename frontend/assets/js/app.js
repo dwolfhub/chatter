@@ -57,14 +57,6 @@ var app = angular.module('chatter', [])
             });
         };
 
-        $scope.parseBody = function (body) {
-            // url replace
-            var urlRegex = /(https?:\/\/[^\s]+)/g;
-            body = body.replace(urlRegex, '<a href="$1">$1</a>');
-            // trust as html
-            return $sce.trustAsHtml(body);
-        };
-
         var welcomeMessage = 'Welcome to ChatterJS!';
         if (!WebSocket) {
             welcomeMessage += ' This site requires the WebSocket API, which your browser does not support. Sorry.';
