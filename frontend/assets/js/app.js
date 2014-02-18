@@ -18,10 +18,10 @@ function ChatterWebSocket() {
 var app = angular.module('chatter', [])
     .directive('focus', function() {
         return function(scope, element) {
-            element[0].focus()
-        }
+            element[0].focus();
+        };
     })
-    .controller('ChatterCtrl', ['$scope', function ($scope) {
+    .controller('ChatterCtrl', ['$scope', '$sce', function ($scope, $sce) {
         $scope.messages = [];
         $scope.message = {};
         $scope.actives = 0;
@@ -30,16 +30,24 @@ var app = angular.module('chatter', [])
             socket.send(JSON.stringify($scope.message));
             $scope.showMessage($scope.message.alias, $scope.message.body);
             $scope.message.body = null;
-        }
+        };
 
         $scope.showMessage = function (name, message) {
             var now = new Date();
             $scope.messages.unshift({
                 name: name,
-                body: message,
+                body: $scope.parseBody(message),
                 datetime: now.toUTCString()
             });
-        }
+        };
+
+        $scope.parseBody = function (body) {
+            // url replace
+            var urlRegex = /(https?:\/\/[^\s]+)/g;
+            body = body.replace(urlRegex, '<a href="$1">$1</a>');
+            // trust as html
+            return $sce.trustAsHtml(body);
+        };
 
         var welcomeMessage = 'Welcome to ChatterJS!';
         if (!WebSocket) {
