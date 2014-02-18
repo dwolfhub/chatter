@@ -8,13 +8,13 @@ function ChatterWebSocket() {
     };
     this.connect = function () {
         socket = new WebSocket(socketURL);
-        for (event in listeners) {
+        for (var event in listeners) {
             socket.addEventListener(event, listeners[event]);
         }
     };
     this.send = function (message) {
         socket.send(message);
-    }
+    };
 }
 
 function MessageParser ($sce) {
