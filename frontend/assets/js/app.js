@@ -14,10 +14,31 @@ function ChatterWebSocket() {
     };
     this.send = function (message) {
         socket.send(message);
+    };
+}
+
+function IncomingMessageProcessor (scope, userMsgParser) {
+    this.setJsonMessage = function (txtMessage) {
+        msg = JSON.parse(txtMessage);
+        return this;
+    };
+    this.setMessage = function (message) {
+        msg = message;
+        return this;
+    };
+    this.processMessage = function () {
+        if (msg.type === 'userCount') {
+            scope.userCount = msg.userCount;
+        } else {
+            msg.body = userMsgParser.parse(msg.body);
+            scope.messages.unshift(msg);
+            scope.$apply();
+        }
+        return this;
     }
 }
 
-function MessageParser ($sce) {
+function UserMessageParser ($sce) {
     var body,
         convertLinks = function () {
             body = body.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1">$1</a>');
@@ -39,6 +60,7 @@ var app = angular.module('chatter', [])
     .controller('ChatterCtrl', ['$scope', '$sce', function ($scope, $sce) {
         $scope.messages = [];
         $scope.message = {};
+        $scope.userCount = 1;
 
         $scope.sendMessage = function () {
             socket.send(JSON.stringify($scope.message));
@@ -48,11 +70,11 @@ var app = angular.module('chatter', [])
 
         $scope.showMessage = function (name, message) {
             var now = new Date();
-            var msgParser = new MessageParser($sce);
+            var userMsgParser = new UserMessageParser($sce);
 
             $scope.messages.unshift({
                 name: name,
-                body: msgParser.parse(message),
+                body: userMsgParser.parse(message),
                 datetime: now.toUTCString()
             });
         };
@@ -78,9 +100,9 @@ var app = angular.module('chatter', [])
             $scope.$apply();
         });
         socket.addEventListener('message', function (e) {
-            var data = JSON.parse(e.data);
-            $scope.showMessage(data.alias, data.body);
-            $scope.$apply();
+            var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce));
+            msgProcessor.setJsonMessage(e.data).processMessage();
         });
+
         socket.connect();
     }]);
