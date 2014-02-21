@@ -12,24 +12,24 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-offset-2 col-md-8 col-sm-12 col-xs-12">
                     <h1>ChatterJS</h1>
-                    <hr>
-                    <form class="form css-form" role="form" novalidate name="messageForm">
-                        <div class="row">
-                            <div class="form-group col-md-3 col-sm-4 col-xs-6">
-                                <input type="text" name="alias" class="form-control" placeholder="Enter a name" ng-model="message.alias" focus required />
+                    <form class="form css-form panel panel-success" role="form" novalidate name="messageForm">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="form-group col-md-3 col-sm-4 col-xs-7">
+                                    <input type="text" name="alias" class="form-control" placeholder="Enter a name" ng-model="message.alias" focus required />
+                                </div>
+                                <div class="col-md-9 col-sm-8 col-xs-5">
+                                    <div class="pull-right"><strong>{{userCount}}</strong> <span class="glyphicon glyphicon-user"></span></div>
+                                </div>
                             </div>
-                            <div class="col-md-9 col-sm-8 col-xs-6">
-                                <div class="pull-right"><span class="badge">{{userCount}} <span class="glyphicon glyphicon-user"></span></span></div>
+                            <div class="input-group" ng-class="{'has-error': messageForm.body.$invalid}">
+                                <input type="text" class="form-control text-small" placeholder="Enter your message" ng-model="message.body" required />
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="sendMessage()" ng-disabled="messageForm.alias.$invalid">Send</button>
+                                </span>
                             </div>
-                        </div>
-                        <div class="input-group" ng-class="{'has-error': messageForm.body.$invalid}">
-                            <input type="text" class="form-control" placeholder="Enter your message" ng-model="message.body" required />
-                            <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary" ng-click="sendMessage()" ng-disabled="messageForm.alias.$invalid">Send</button>
-                            </span>
                         </div>
                     </form>
-                    <hr>
                     <div class="chat-messages">
                         <dl ng-repeat="msg in messages">
                             <dt>{{ msg.alias }} <span class="small text-muted">[{{ msg.datetime }}]</span></dt>

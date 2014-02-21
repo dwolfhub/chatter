@@ -17,6 +17,30 @@ function ChatterWebSocket() {
     };
 }
 
+function IncomingMessageProcessor (scope, userMsgParser) {
+    var msg;
+
+    this.setJsonMessage = function (txtMessage) {
+        msg = JSON.parse(txtMessage);
+        return this;
+    };
+    this.setMessage = function (message) {
+        msg = message;
+        return this;
+    };
+    this.processMessage = function () {
+        if (msg.type === 'userCount') {
+            scope.userCount = msg.body;
+        } else {
+            var now = new Date();
+            msg.datetime = now.toUTCString();
+            msg.body = userMsgParser.parse(msg.body);
+            scope.messages.unshift(msg);
+        }
+        return this;
+    }
+}
+
 function UserMessageParser ($sce) {
     var body,
         convertLinks = function () {
@@ -41,45 +65,51 @@ var app = angular.module('chatter', [])
         $scope.message = {};
         $scope.userCount = 1;
 
+        var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce));
+
         $scope.sendMessage = function () {
             socket.send(JSON.stringify($scope.message));
             $scope.showMessage($scope.message.alias, $scope.message.body);
             $scope.message.body = null;
         };
 
-        $scope.showMessage = function (alias, message) {
-            var now = new Date();
-            var userMsgParser = new UserMessageParser($sce);
-
-            $scope.messages.unshift({
-                alias: name,
-                body: userMsgParser.parse(message),
-                datetime: now.toUTCString()
-            });
-        };
-
-        var welcomeMessage = 'Welcome to ChatterJS!';
-        if (!WebSocket) {
-            welcomeMessage += ' This site requires the WebSocket API, which your browser does not support. Sorry.';
-        }
-
-        $scope.showMessage('Admin', welcomeMessage);
+        (function () {
+            var welcomeMessage = {
+                alias: 'Admin',
+                body: 'Welcome to ChatterJS!'
+            };
+            if (!WebSocket) {
+                welcomeMessage += ' This site requires the WebSocket API, which your browser does not support. Sorry.';
+            }
+            msgProcessor.setMessage(welcomeMessage).processMessage();
+        })();
 
         var socket = new ChatterWebSocket();
         socket.addEventListener('open', function (e) {
-            $scope.showMessage('Admin', 'You are now connected!');
+            var msg = {
+                alias: 'Admin',
+                body: 'You are now connected!'
+            };
+            msgProcessor.setMessage(msg).processMessage();
             $scope.$apply();
         });
         socket.addEventListener('error', function (e) {
-            $scope.showMessage('Admin', 'An error has occurred! Trying to reconnect.');
+            var msg = {
+                alias: 'Admin',
+                body: 'An error has occurred! Trying to reconnect.'
+            };
+            msgProcessor.setMessage(msg).processMessage();
             $scope.$apply();
         });
         socket.addEventListener('close', function (e) {
-            $scope.showMessage('Admin', 'You are now disconnected!');
+            var msg = {
+                alias: 'Admin',
+                body: 'You are now disconnected!'
+            };
+            msgProcessor.setMessage(msg).processMessage();
             $scope.$apply();
         });
         socket.addEventListener('message', function (e) {
-            var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce));
             msgProcessor.setJsonMessage(e.data).processMessage();
             $scope.$apply();
         });
