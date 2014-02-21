@@ -19,7 +19,7 @@
                                 <input type="text" name="alias" class="form-control" placeholder="Enter a name" ng-model="message.alias" focus required />
                             </div>
                             <div class="col-md-9 col-sm-8 col-xs-5">
-                                <div class="pull-right"><strong>{{userCount}}</strong> <span class="glyphicon glyphicon-user"></span><span class="glyphicon glyphicon-user"></span></div>
+                                <div class="pull-right" ng-class="{'text-danger':userCount==1,'text-success':userCount==2,'text-warning':userCount>2}"><strong>{{userCount}}</strong> <i class="glyphicon glyphicon-comment"></i></div>
                             </div>
                         </div>
                         <div class="input-group" ng-class="{'has-error': messageForm.body.$invalid}">

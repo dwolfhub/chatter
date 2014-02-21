@@ -17,7 +17,7 @@ function ChatterWebSocket() {
     };
 }
 
-function IncomingMessageProcessor (scope, userMsgParser) {
+function IncomingMessageProcessor(scope, userMsgParser) {
     var msg;
 
     this.setJsonMessage = function (txtMessage) {
@@ -38,7 +38,7 @@ function IncomingMessageProcessor (scope, userMsgParser) {
             scope.messages.unshift(msg);
         }
         return this;
-    }
+    };
 }
 
 function UserMessageParser ($sce) {
