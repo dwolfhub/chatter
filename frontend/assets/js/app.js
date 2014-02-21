@@ -8,38 +8,13 @@ function ChatterWebSocket() {
     };
     this.connect = function () {
         socket = new WebSocket(socketURL);
-        for (event in listeners) {
+        for (var event in listeners) {
             socket.addEventListener(event, listeners[event]);
         }
     };
     this.send = function (message) {
         socket.send(message);
     };
-}
-
-function IncomingMessageProcessor (scope, userMsgParser) {
-    var msg;
-
-    this.setJsonMessage = function (txtMessage) {
-        msg = JSON.parse(txtMessage);
-        return this;
-    };
-    this.setMessage = function (message) {
-        msg = message;
-        return this;
-    };
-    this.processMessage = function () {
-        if (msg.type === 'userCount') {
-            scope.userCount = msg.body;
-        } else {
-            console.log(msg);
-            msg.body = userMsgParser.parse(msg.body);
-            console.log(msg);
-            scope.messages.unshift(msg);
-            scope.$apply();
-        }
-        return this;
-    }
 }
 
 function UserMessageParser ($sce) {
