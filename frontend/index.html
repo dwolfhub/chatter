@@ -23,9 +23,9 @@
                             </div>
                         </div>
                         <div class="input-group" ng-class="{'has-error': messageForm.body.$invalid}">
-                            <input type="text" class="form-control text-small" placeholder="Enter your message" ng-model="message.body" required />
+                            <input type="text" name="body" class="form-control text-small" placeholder="Enter your message" ng-model="message.body" required />
                             <span class="input-group-btn">
-                                <button type="submit" class="btn btn-primary" ng-click="sendMessage()" ng-disabled="messageForm.alias.$invalid">Send</button>
+                                <button type="submit" class="btn btn-primary" ng-click="sendMessage()" ng-disabled="messageForm.alias.$invalid||messageForm.body.$invalid">Send</button>
                             </span>
                         </div>
                     </form>
