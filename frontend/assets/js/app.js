@@ -68,8 +68,8 @@ var app = angular.module('chatter', [])
         var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce));
 
         $scope.sendMessage = function () {
-            socket.send(JSON.stringify($scope.message));
-            $scope.showMessage($scope.message.alias, $scope.message.body);
+            var msg = $scope.message;
+            socket.send(JSON.stringify(msg));
             $scope.message.body = null;
         };
 

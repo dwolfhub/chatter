@@ -27,9 +27,7 @@ class Chatter implements MessageComponentInterface {
         $numRecv = count($this->clients) - 1;
 
         foreach ($this->clients as $client) {
-            if ($from !== $client) {
-                $client->send($msg);
-            }
+            $client->send($msg);
         }
     }
 
