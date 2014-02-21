@@ -14,13 +14,7 @@ class Chatter implements MessageComponentInterface {
 
     public function onOpen(ConnectionInterface $conn) {
         $this->clients->attach($conn);
-
-        $clientCount = count($this->clients);
-        $msg = '{"type":"userCount","body":"' . $clientCount . '"}';
-
-        foreach ($this->clients as $client) {
-            $client->send($msg);
-        }
+        $this->userCountChange();
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
@@ -33,18 +27,20 @@ class Chatter implements MessageComponentInterface {
 
     public function onClose(ConnectionInterface $conn) {
         $this->clients->detach($conn);
-
-        $clientCount = count($this->clients);
-        $msg = '{"type":"userCount","body":"' . $clientCount . '"}';
-
-        foreach ($this->clients as $client) {
-            if ($conn !== $client) {
-                $client->send($msg);
-            }
-        }
+        $this->userCountChange();
     }
 
     public function onError(ConnectionInterface $conn, \Exception $e) {
         $conn->close();
+    }
+
+    private function userCountChange()
+    {
+        $clientCount = count($this->clients);
+        $msg = '{"type":"userCount","body":"' . $clientCount . '"}';
+
+        foreach ($this->clients as $client) {
+            $client->send($msg);
+        }
     }
 }
