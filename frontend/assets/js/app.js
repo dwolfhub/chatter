@@ -44,7 +44,7 @@ function IncomingMessageProcessor (scope, userMsgParser) {
 function UserMessageParser ($sce) {
     var body,
         convertLinks = function () {
-            body = body.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1">$1</a>');
+            body = body.replace(/(https?:\/\/[^\s]+)/g, '<a target="_blank" href="$1">$1</a>');
         };
 
     this.parse = function (input) {
