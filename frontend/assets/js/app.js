@@ -18,6 +18,8 @@ function ChatterWebSocket() {
 }
 
 function IncomingMessageProcessor (scope, userMsgParser) {
+    var msg;
+
     this.setJsonMessage = function (txtMessage) {
         msg = JSON.parse(txtMessage);
         return this;
@@ -28,9 +30,11 @@ function IncomingMessageProcessor (scope, userMsgParser) {
     };
     this.processMessage = function () {
         if (msg.type === 'userCount') {
-            scope.userCount = msg.userCount;
+            scope.userCount = msg.body;
         } else {
+            console.log(msg);
             msg.body = userMsgParser.parse(msg.body);
+            console.log(msg);
             scope.messages.unshift(msg);
             scope.$apply();
         }
@@ -68,12 +72,12 @@ var app = angular.module('chatter', [])
             $scope.message.body = null;
         };
 
-        $scope.showMessage = function (name, message) {
+        $scope.showMessage = function (alias, message) {
             var now = new Date();
             var userMsgParser = new UserMessageParser($sce);
 
             $scope.messages.unshift({
-                name: name,
+                alias: name,
                 body: userMsgParser.parse(message),
                 datetime: now.toUTCString()
             });
@@ -102,6 +106,7 @@ var app = angular.module('chatter', [])
         socket.addEventListener('message', function (e) {
             var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce));
             msgProcessor.setJsonMessage(e.data).processMessage();
+            $scope.$apply();
         });
 
         socket.connect();
