@@ -1,4 +1,4 @@
-function ChatterWebSocket() {
+function ChatterWebSocket () {
     var socket,
     socketURL = 'ws://chatterjs.com:8080/',
     listeners = [];
@@ -11,13 +11,48 @@ function ChatterWebSocket() {
         for (var event in listeners) {
             socket.addEventListener(event, listeners[event]);
         }
+        return this;
     };
     this.send = function (message) {
         socket.send(message);
     };
 }
 
-function IncomingMessageProcessor(scope, userMsgParser) {
+function ChatterWebSocketSetup (msgProcessor, $scope) {
+    var socket = new ChatterWebSocket();
+    socket.addEventListener('open', function (e) {
+        var msg = {
+            alias: 'Admin',
+            body: 'You are now connected!'
+        };
+        msgProcessor.setMessage(msg).processMessage();
+        $scope.$apply();
+    });
+    socket.addEventListener('error', function (e) {
+        var msg = {
+            alias: 'Admin',
+            body: 'An error has occurred! Trying to reconnect.'
+        };
+        msgProcessor.setMessage(msg).processMessage();
+        $scope.$apply();
+    });
+    socket.addEventListener('close', function (e) {
+        var msg = {
+            alias: 'Admin',
+            body: 'You are now disconnected!'
+        };
+        msgProcessor.setMessage(msg).processMessage();
+        $scope.$apply();
+    });
+    socket.addEventListener('message', function (e) {
+        msgProcessor.setJsonMessage(e.data).processMessage();
+        $scope.$apply();
+    });
+
+    return socket.connect();
+}
+
+function IncomingMessageProcessor (scope, userMsgParser, notification) {
     var msg;
 
     this.setJsonMessage = function (txtMessage) {
@@ -36,6 +71,7 @@ function IncomingMessageProcessor(scope, userMsgParser) {
             msg.datetime = now.toUTCString();
             msg.body = userMsgParser.parse(msg.body);
             scope.messages.unshift(msg);
+            notification.newMessage();
         }
         return this;
     };
@@ -54,6 +90,38 @@ function UserMessageParser ($sce) {
     };
 }
 
+function Notification () {
+    this.msgCount = 0;
+    this.interval = null;
+
+    this.newMessage = function () {
+        if (!document.hasFocus()) {
+            var _this = this;
+            this.msgCount++;
+            if (this.interval === null) {
+                this.interval = setInterval(function () {
+                    var plural = (_this.msgCount > 1)? 's': '', newTitle;
+                    if (document.title === 'ChatterJS') {
+                        newTitle = _this.msgCount + ' new message' + plural + '!'
+                    } else {
+                        newTitle = 'ChatterJS';
+                    }
+                    document.title = newTitle;
+                    if (document.hasFocus()) {
+                        _this.clearInterval();
+                    }
+                }, 500);
+            }
+        }
+    };
+
+    this.clearInterval = function () {
+        this.msgCount = 0;
+        clearInterval(this.interval);
+        this.interval = null;
+    }
+}
+
 var app = angular.module('chatter', [])
     .directive('focus', function() {
         return function(scope, element) {
@@ -65,7 +133,8 @@ var app = angular.module('chatter', [])
         $scope.message = {};
         $scope.userCount = 1;
 
-        var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce));
+        var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce), new Notification())
+            socket = ChatterWebSocketSetup(msgProcessor, $scope);
 
         $scope.sendMessage = function () {
             var msg = $scope.message;
@@ -83,36 +152,4 @@ var app = angular.module('chatter', [])
             }
             msgProcessor.setMessage(welcomeMessage).processMessage();
         })();
-
-        var socket = new ChatterWebSocket();
-        socket.addEventListener('open', function (e) {
-            var msg = {
-                alias: 'Admin',
-                body: 'You are now connected!'
-            };
-            msgProcessor.setMessage(msg).processMessage();
-            $scope.$apply();
-        });
-        socket.addEventListener('error', function (e) {
-            var msg = {
-                alias: 'Admin',
-                body: 'An error has occurred! Trying to reconnect.'
-            };
-            msgProcessor.setMessage(msg).processMessage();
-            $scope.$apply();
-        });
-        socket.addEventListener('close', function (e) {
-            var msg = {
-                alias: 'Admin',
-                body: 'You are now disconnected!'
-            };
-            msgProcessor.setMessage(msg).processMessage();
-            $scope.$apply();
-        });
-        socket.addEventListener('message', function (e) {
-            msgProcessor.setJsonMessage(e.data).processMessage();
-            $scope.$apply();
-        });
-
-        socket.connect();
     }]);

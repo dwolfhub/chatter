@@ -32,7 +32,7 @@
                     <hr>
                     <div class="chat-messages container">
                         <dl ng-repeat="msg in messages">
-                            <dt>{{ msg.alias }} <span class="small text-muted">[{{ msg.datetime }}]</span></dt>
+                            <dt ng-class="{'text-primary':msg.isSender}">{{ msg.alias }} <span class="small text-muted">[{{ msg.datetime }}]</span></dt>
                             <dd ng-bind-html="msg.body"></dd>
                         </dl>
                     </div>

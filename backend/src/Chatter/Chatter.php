@@ -18,10 +18,17 @@ class Chatter implements MessageComponentInterface {
     }
 
     public function onMessage(ConnectionInterface $from, $msg) {
-        $numRecv = count($this->clients) - 1;
-
         foreach ($this->clients as $client) {
-            $client->send($msg);
+            if ($from === $client) {
+                $oldMsg = $msg;
+                $msg = json_decode($msg);
+                $msg->isSender = true;
+                $msg = json_encode($msg);
+                $client->send($msg);
+                $msg = $oldMsg;
+            } else {
+                $client->send($msg);
+            }
         }
     }
 
