@@ -1,3 +1,6 @@
+
+"use strict"
+
 function ChatterWebSocket () {
     var socket,
     socketURL = 'ws://chatterjs.com:8080/',
@@ -133,7 +136,7 @@ var app = angular.module('chatter', [])
         $scope.message = {};
         $scope.userCount = 1;
 
-        var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce), new Notification())
+        var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce), new Notification()),
             socket = ChatterWebSocketSetup(msgProcessor, $scope);
 
         $scope.sendMessage = function () {
