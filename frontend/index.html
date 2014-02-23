@@ -9,7 +9,8 @@
     </head>
     <body ng-app="chatter">
         <div class="container" ng-controller="ChatterCtrl">
-            <div class="row">
+            <div class="row" file-dropzone="[image/png, image/jpeg, image/gif]"
+        file="image" file-name="imageFileName" data-max-file-size="3">
                 <div class="col-lg-8 col-lg-offset-2 col-md-offset-2 col-md-8 col-sm-12 col-xs-12">
                     <h1>ChatterJS <span class="text-muted glyphicon glyphicon-comment"></span></h1>
                     <hr>
@@ -31,10 +32,12 @@
                     </form>
                     <hr>
                     <div class="chat-messages container">
-                        <dl ng-repeat="msg in messages">
-                            <dt ng-class="{'text-primary':msg.isSender}">{{ msg.alias }} <span class="small text-muted">[{{ msg.datetime }}]</span></dt>
-                            <dd ng-bind-html="msg.body"></dd>
-                        </dl>
+                        <form action="">
+                            <dl ng-repeat="msg in messages">
+                                <dt ng-class="{'text-primary':msg.isSender}">{{ msg.alias }} <span class="small text-muted">[{{ msg.datetime }}]</span></dt>
+                                <dd ng-bind-html="msg.body"></dd>
+                            </dl>
+                        </form>
                     </div>
                 </div>
             </div>

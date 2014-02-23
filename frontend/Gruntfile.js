@@ -15,11 +15,11 @@ module.exports = function(grunt) {
         },
         concat: {
             options: {
-                separator: ';'
+                separator: ''
             },
             dist: {
-                src: ['assets/js/*.js'],
-                dest: 'assets/app.js'
+                src: ['assets/js/app.js'],
+                dest: 'assets/js/compiled/app.js'
             }
         },
         imagemin: {
@@ -88,6 +88,10 @@ module.exports = function(grunt) {
             css: {
                 files: '**/*.scss',
                 tasks: ['sass:dev']
+            },
+            js: {
+                files: ['assets/js/app.js'],
+                tasks: ['concat']
             }
         }
     });
