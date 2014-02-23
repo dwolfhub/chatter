@@ -1,93 +1,8 @@
 (function (angular) {
   "use strict";
 
-  function ChatterWebSocket () {
-    var socket,
-    socketURL = 'ws://chatterjs.com:8080/',
-    listeners = [];
-
-    this.addEventListener = function (event, callback) {
-      listeners[event] = callback;
-    };
-    this.connect = function () {
-      socket = new WebSocket(socketURL);
-      for (var event in listeners) {
-        socket.addEventListener(event, listeners[event]);
-      }
-      return this;
-    };
-    this.send = function (message) {
-      socket.send(message);
-    };
-  }
-
-  function ChatterWebSocketSetup (msgProcessor, $scope) {
-    var socket = new ChatterWebSocket(),
-    setAMessageProcessAndApply = function (alias, body) {
-      var msg = {
-        alias: alias,
-        body: body
-      };
-      msgProcessor.setMessage(msg).processMessage();
-      $scope.$apply();
-    };
-
-    socket.addEventListener('open', function (e) {
-      setAMessageProcessAndApply('Admin', 'You are now connected!');
-    });
-    socket.addEventListener('error', function (e) {
-      setAMessageProcessAndApply('Admin', 'An error has occurred!');
-    });
-    socket.addEventListener('close', function (e) {
-      setAMessageProcessAndApply('Admin', 'You are now disconnected!');
-    });
-    socket.addEventListener('message', function (e) {
-      msgProcessor.setJsonMessage(e.data).processMessage();
-      $scope.$apply();
-    });
-
-    return socket.connect();
-  }
-
-  function IncomingMessageProcessor (scope, userMsgParser, notification) {
-    var msg;
-
-    this.setJsonMessage = function (txtMessage) {
-      msg = JSON.parse(txtMessage);
-      return this;
-    };
-    this.setMessage = function (message) {
-      msg = message;
-      return this;
-    };
-    this.processMessage = function () {
-      if (msg.type === 'userCount') {
-        scope.userCount = msg.body;
-      } else {
-        var now = new Date();
-        msg.datetime = now.toUTCString();
-        msg.body = userMsgParser.parse(msg.body);
-        scope.messages.unshift(msg);
-        notification.newMessage();
-      }
-      return this;
-    };
-  }
-
-  function UserMessageParser ($sce) {
-    var body,
-    convertLinks = function () {
-      body = body.replace(/(https?:\/\/[^\s]+)/g, '<a target="_blank" href="$1">$1</a>');
-    };
-
-    this.parse = function (input) {
-      body = input;
-      convertLinks();
-      return $sce.trustAsHtml(body);
-    };
-  }
-
-  function Notification () {
+  var app = angular.module('chatter', [])
+  .service('notification', function () {
     var executeInterval = function (_this) {
         var plural, newTitle = 'ChatterJS';
 
@@ -122,27 +37,114 @@
       clearInterval(this.interval);
       this.interval = null;
     };
-  }
+  })
+  .service('userMessageParser', ['$sce', function ($sce) {
+    var body,
+    convertLinks = function () {
+      body = body.replace(/(https?:\/\/[^\s]+)/g, '<a target="_blank" href="$1">$1</a>');
+    };
 
-  var app = angular.module('chatter', [])
+    this.parse = function (input) {
+      body = input;
+      convertLinks();
+      return $sce.trustAsHtml(body);
+    };
+  }])
+  .service('incomingMessageProcessor', ['userMessageParser', 'notification', function (userMessageParser, notification) {
+    var msg, $scope;
+
+    this.setScope = function (scope) {
+      $scope = scope;
+    };
+    this.setJsonMessage = function (txtMessage) {
+      msg = JSON.parse(txtMessage);
+      return this;
+    };
+    this.setMessage = function (message) {
+      msg = message;
+      return this;
+    };
+    this.processMessage = function () {
+      if (msg.type === 'userCount') {
+        $scope.userCount = msg.body;
+      } else {
+        var now = new Date();
+        msg.datetime = now.toUTCString();
+        msg.body = userMessageParser.parse(msg.body);
+        $scope.messages.unshift(msg);
+        notification.newMessage();
+      }
+      return this;
+    };
+  }])
+  .service('chatterWebSocket', function () {
+    var socket,
+    socketURL = 'ws://chatterjs.com:8080/',
+    listeners = [];
+
+    this.addEventListener = function (event, callback) {
+      listeners[event] = callback;
+    };
+    this.connect = function () {
+      socket = new WebSocket(socketURL);
+      for (var event in listeners) {
+        socket.addEventListener(event, listeners[event]);
+      }
+      return this;
+    };
+    this.send = function (message) {
+      socket.send(message);
+    };
+  })
+  .service('chatterWebSocketSetup', ['chatterWebSocket', 'incomingMessageProcessor', function (chatterWebSocket, incomingMessageProcessor) {
+    this.init = function ($scope) {
+      var setAMessageProcessAndApply = function (alias, body) {
+        var msg = {
+          alias: alias,
+          body: body
+        };
+        incomingMessageProcessor.setMessage(msg).processMessage();
+        $scope.$apply();
+      };
+
+      chatterWebSocket.addEventListener('open', function (e) {
+        setAMessageProcessAndApply('Admin', 'You are now connected!');
+      });
+      chatterWebSocket.addEventListener('error', function (e) {
+        setAMessageProcessAndApply('Admin', 'An error has occurred!');
+      });
+      chatterWebSocket.addEventListener('close', function (e) {
+        setAMessageProcessAndApply('Admin', 'You are now disconnected!');
+      });
+      chatterWebSocket.addEventListener('message', function (e) {
+        incomingMessageProcessor.setJsonMessage(e.data).processMessage();
+        $scope.$apply();
+      });
+
+      return chatterWebSocket.connect();
+    };
+  }])
   .directive('focus', function() {
     return function(scope, element) {
       element[0].focus();
     };
   })
+  .directive('fileDropzoneActivator', function () {
+    return {
+      link: function (scope, element, attrs) {
+        element.bind('dragenter', function () {
+          scope.showFileDrop = true;
+          scope.$apply();
+        });
+      }
+    };
+  })
   .directive('fileDropzone', function() {
     return {
-      restrict: 'A',
-      scope: {
-        file: '=',
-        fileName: '='
-      },
       link: function(scope, element, attrs) {
         var checkSize, isTypeValid, processDragOverOrEnter, validMimeTypes;
         processDragOverOrEnter = function(event) {
-          if (event !== null) {
-            event.preventDefault();
-          }
+          event.preventDefault();
           event.dataTransfer.effectAllowed = 'copy';
           return false;
         };
@@ -164,22 +166,30 @@
             return false;
           }
         };
+
         element.bind('dragover', processDragOverOrEnter);
         element.bind('dragenter', processDragOverOrEnter);
+        element.bind('dragleave', function(event) {
+          event.preventDefault();
+          return scope.$apply(function () {
+            scope.showFileDrop = false;
+          });
+        });
+
         return element.bind('drop', function(event) {
+          event.preventDefault();
+
           var file, name, reader, size, type;
-          if (event !== null) {
-            event.preventDefault();
-          }
           reader = new FileReader();
           reader.onload = function(evt) {
             if (checkSize(size) && isTypeValid(type)) {
               return scope.$apply(function() {
-                scope.file = evt.target.result;
-                if (angular.isString(scope.fileName)) {
-                  scope.fileName = name;
-                  return scope.fileName;
-                }
+                var currMsg = scope.message;
+                scope.message.alias = scope.message.alias || 'Anonymous';
+                scope.message.body = '<img src="' + evt.target.result + '" />';
+                scope.sendMessage();
+                scope.message = currMsg;
+                scope.showFileDrop = false;
               });
             }
           };
@@ -193,15 +203,14 @@
       }
     };
   })
-  .controller('ChatterCtrl', ['$scope', '$sce', function ($scope, $sce) {
+  .controller('ChatterCtrl', ['$scope', '$sce', 'incomingMessageProcessor', 'chatterWebSocketSetup', 'notification', function ($scope, $sce, incomingMessageProcessor, chatterWebSocketSetup, notification) {
     $scope.messages = [];
     $scope.message = {};
     $scope.userCount = 1;
     $scope.image = null;
     $scope.imageFileName = '';
-
-    var msgProcessor = new IncomingMessageProcessor($scope, new UserMessageParser($sce), new Notification()),
-    socket = new ChatterWebSocketSetup(msgProcessor, $scope);
+    $scope.showFileDrop = false;
+    $scope.sendingFiles = [];
 
     $scope.sendMessage = function () {
       var msg = $scope.message;
@@ -209,6 +218,8 @@
       $scope.message.body = null;
     };
 
+    var socket = chatterWebSocketSetup.init($scope);
+    incomingMessageProcessor.setScope($scope);
 
     (function () {
       var welcomeMessage = {
@@ -218,7 +229,7 @@
       if (!WebSocket) {
         welcomeMessage += ' This site requires the WebSocket API, which your browser does not support. Sorry.';
       }
-      msgProcessor.setMessage(welcomeMessage).processMessage();
+      incomingMessageProcessor.setMessage(welcomeMessage).processMessage();
     })();
   }]);
 })(angular);

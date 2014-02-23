@@ -88,10 +88,6 @@ module.exports = function(grunt) {
             css: {
                 files: '**/*.scss',
                 tasks: ['sass:dev']
-            },
-            js: {
-                files: ['assets/js/app.js'],
-                tasks: ['concat']
             }
         }
     });
