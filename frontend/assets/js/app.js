@@ -136,7 +136,7 @@
   }])
   .directive('focus', function() {
     return function(scope, element) {
-      element[0].focus();
+      element[0].focus(function() { this.select(); } );
     };
   })
   .directive('fileDropzoneActivator', function () {
@@ -164,7 +164,17 @@
           if (((_ref = attrs.maxFileSize) === (void 0) || _ref === '') || (size / 1024) / 1024 < attrs.maxFileSize) {
             return true;
           } else {
-            alert("File must be smaller than " + attrs.maxFileSize + " MB");
+            (function (scope) {
+              clearTimeout(scope.fileErrorMessageTimeout);
+              scope.fileErrorMessageTimeout = setTimeout(function () {
+                scope.$apply(function () {
+                  scope.fileErrorMessage = null;
+                });
+              }, 5e3);
+            })(scope);
+            scope.$apply(function () {
+              scope.fileErrorMessage = 'File too big. 5mb only.';
+            });
             return false;
           }
         };
@@ -172,7 +182,17 @@
           if ((validMimeTypes === (void 0) || validMimeTypes === '') || validMimeTypes.indexOf(type) > -1) {
             return true;
           } else {
-            alert("Invalid file type.  File must be one of following types " + validMimeTypes);
+            (function (scope) {
+              clearTimeout(scope.fileErrorMessageTimeout);
+              scope.fileErrorMessageTimeout = setTimeout(function () {
+                scope.$apply(function () {
+                  scope.fileErrorMessage = null;
+                });
+              }, 5e3);
+            })(scope);
+            scope.$apply(function () {
+              scope.fileErrorMessage = 'Only png, jpg, or gif allowed.';
+            });
             return false;
           }
         };
@@ -203,10 +223,13 @@
                 scope.message.body = '<img src="' + evt.target.result + '" />';
                 scope.sendMessage();
                 scope.message = currMsg;
-                scope.showFileDrop = false;
                 scope.sendingFiles.push('<img src="' + evt.target.result + '" />');
+                scope.showFileDrop = false;
               });
             }
+            return scope.$apply(function() {
+              scope.showFileDrop = false;
+            });
           };
           reader.readAsDataURL(file);
           return false;
@@ -216,12 +239,16 @@
   })
   .controller('ChatterCtrl', ['$scope', '$sce', 'incomingMessageProcessor', 'chatterWebSocketSetup', 'notification', function ($scope, $sce, incomingMessageProcessor, chatterWebSocketSetup, notification) {
     $scope.messages = [];
-    $scope.message = {};
+    $scope.message = {
+      alias: 'Anonymous'
+    };
     $scope.userCount = 1;
     $scope.image = null;
     $scope.imageFileName = '';
     $scope.showFileDrop = false;
     $scope.sendingFiles = [];
+    $scope.fileErrorMessage = null;
+    $scope.fileErrorMessageTimeout = null;
 
     $scope.sendMessage = function () {
       var msg = $scope.message;

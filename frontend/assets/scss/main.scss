@@ -6,10 +6,12 @@ html{
         .css-form {
             .glyphicon-cloud-upload {
                 font-size: 2em;
-                -webkit-animation: wiggle .5s linear infinite;
-                -moz-animation: wiggle .5s linear infinite;
-                animation: wiggle .5s linear infinite;
             }
+        }
+        .wiggly {
+            -webkit-animation: wiggle .5s linear infinite;
+            -moz-animation: wiggle .5s linear infinite;
+            animation: wiggle .5s linear infinite;
         }
         .chat-messages {
             dd {
@@ -45,6 +47,7 @@ html{
                 margin: 100px auto 0;
                 .glyphicon-cloud-upload {
                     font-size: 24em;
+                    padding: 25px;
                 }
             }
         }
