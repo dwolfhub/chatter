@@ -6,9 +6,9 @@ html{
         .css-form {
             .glyphicon-cloud-upload {
                 font-size: 2em;
-                -webkit-animation: spin .5s linear infinite;
-                -moz-animation: spin .5s linear infinite;
-                animation: spin .5s linear infinite;
+                -webkit-animation: wiggle .5s linear infinite;
+                -moz-animation: wiggle .5s linear infinite;
+                animation: wiggle .5s linear infinite;
             }
         }
         .chat-messages {
@@ -50,17 +50,17 @@ html{
         }
     }
 }
-@-moz-keyframes spin {
+@-moz-keyframes wiggle {
     0% { -moz-transform: rotate(12deg); }
     50% { -moz-transform: rotate(-12deg); }
     100% { -moz-transform: rotate(12deg); }
 }
-@-webkit-keyframes spin {
+@-webkit-keyframes wiggle {
     0% { -webkit-transform: rotate(12deg); }
     50% { -webkit-transform: rotate(-12deg); }
     100% { -webkit-transform: rotate(12deg); }
 }
-@keyframes spin {
+@keyframes wiggle {
     0% { -webkit-transform: rotate(12deg); transform:rotate(12deg); }
     50% { -webkit-transform: rotate(-12deg); transform:rotate(-12deg); }
     100% { -webkit-transform: rotate(12deg); transform:rotate(12deg); }

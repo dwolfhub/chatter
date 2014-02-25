@@ -70,6 +70,16 @@
       } else {
         var now = new Date();
         msg.datetime = now.toUTCString();
+
+        // is this a pending image message?
+        if ($scope.sendingFiles.length) {
+          for (var a = $scope.sendingFiles.length - 1; a >= 0; a--) {
+            if ($scope.sendingFiles[a] === msg.body) {
+              $scope.sendingFiles.splice(a, 1);
+            }
+          }
+        }
+
         msg.body = userMessageParser.parse(msg.body);
         $scope.messages.unshift(msg);
         notification.newMessage();
@@ -179,8 +189,12 @@
         return element.bind('drop', function(event) {
           event.preventDefault();
 
-          var file, name, reader, size, type;
-          reader = new FileReader();
+          var file = event.dataTransfer.files[0],
+              name = file.name,
+              size = file.size,
+              type = file.type,
+              reader = new FileReader();
+
           reader.onload = function(evt) {
             if (checkSize(size) && isTypeValid(type)) {
               return scope.$apply(function() {
@@ -190,13 +204,10 @@
                 scope.sendMessage();
                 scope.message = currMsg;
                 scope.showFileDrop = false;
+                scope.sendingFiles.push('<img src="' + evt.target.result + '" />');
               });
             }
           };
-          file = event.dataTransfer.files[0];
-          name = file.name;
-          type = file.type;
-          size = file.size;
           reader.readAsDataURL(file);
           return false;
         });
