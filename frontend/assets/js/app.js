@@ -141,7 +141,7 @@
             link: function(scope, element){
                 //wait until intial value is there, then select it, then clear the watch so doesn't keep doing it
                 var clearWatch = scope.$watch(
-                    function(){ return element[0].value },
+                    function(){ return element[0].value; },
                     function(value){
                         if (value){
                             element[0].select();
