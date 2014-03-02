@@ -119,6 +119,7 @@
 
             chatterWebSocket.addEventListener('open', function (e) {
                 setAMessageProcessAndApply('Admin', 'You are now connected!');
+
             });
             chatterWebSocket.addEventListener('error', function (e) {
                 setAMessageProcessAndApply('Admin', 'An error has occurred!');
@@ -134,9 +135,21 @@
             return chatterWebSocket.connect();
         };
     }])
-    .directive('focus', function() {
-        return function(scope, element) {
-            element[0].focus(function() { this.select(); } );
+    .directive('dwfocusandselect', function() {
+        console.log('hmmm');
+        return {
+            link: function(scope, element){
+                //wait until intial value is there, then select it, then clear the watch so doesn't keep doing it
+                var clearWatch = scope.$watch(
+                    function(){ return element[0].value },
+                    function(value){
+                        if (value){
+                            element[0].select();
+                            clearWatch();
+                        }
+                    }
+                );
+            }
         };
     })
     .directive('fileDropzoneActivator', function () {
