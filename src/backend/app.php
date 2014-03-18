@@ -13,6 +13,6 @@ $server = IoServer::factory(
                 new Chatter()
             )
         ),
-        8080
+        8000
     );
 $server->run();

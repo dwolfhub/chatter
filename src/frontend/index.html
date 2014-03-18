@@ -16,7 +16,7 @@
                     <form class="form css-form" role="form" novalidate name="messageForm">
                         <div class="row">
                             <div class="form-group col-md-3 col-sm-4 col-xs-7">
-                                <input type="text" id="alias-field" name="alias" class="form-control" placeholder="Enter a name" ng-model="message.alias" dwfocusandselect required />
+                                <input type="text" id="alias-field" name="alias" class="form-control" placeholder="Enter a name" ng-model="message.alias" autofocus required />
                             </div>
                             <div class="col-md-9 col-sm-8 col-xs-5">
                                 <span class="glyphicon glyphicon-cloud-upload pull-left wiggly fade" ng-class="{in:sendingFiles.length}"></span>
@@ -47,7 +47,8 @@
                 </div>
             </div>
         </div>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.12/angular.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"></script>
+        <script src="node_modules/angular-websocket/angular-websocket.js"></script>
         <script src="assets/js/app.js"></script>
     </body>
 </html>

@@ -1,4 +1,13 @@
 module.exports = function(grunt) {
+    grunt.registerTask("reload", "reload Chrome on OS X",
+        function() {
+        require("child_process").exec("osascript " +
+        "-e 'tell application \"Google Chrome\" " +
+        "to tell the active tab of its first window' " +
+        "-e 'reload' " +
+        "-e 'end tell'");
+    });
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         compress: {
@@ -86,8 +95,12 @@ module.exports = function(grunt) {
         },
         watch: {
             css: {
-                files: '**/*.scss',
-                tasks: ['sass:dev']
+                files: 'assets/**/*.scss',
+                tasks: ['sass:dev', 'reload']
+            },
+            js: {
+                files: 'assets/**/*.js',
+                tasks: ['reload']
             }
         }
     });
